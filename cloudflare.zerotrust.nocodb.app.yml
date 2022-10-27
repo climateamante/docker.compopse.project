@@ -1,0 +1,36 @@
+version: '3.5'
+services:
+
+  cloudflare:
+    image: cloudflare/cloudflared:latest
+    network_mode: host
+    restart: always
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE}
+    privileged: true
+
+  database:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - nocodb:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_DATABASES: ${POSTGRES_DATABASE} 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      noco-network:
+
+  noco:
+    restart: always
+    image: nocodb/nocodb:latest
+    ports:
+      - '8080:8080'
+    networks:
+      noco-network:
+
+networks:
+  noco-network:
+volumes:
+  nocodb:
